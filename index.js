@@ -39,9 +39,70 @@ app.get('/excel', async (req, res) => {
     data.answer = JSON.parse(data.answer);
     return data;
   })
+  let data = [];
+  for (let info of result) {
+    let district = await query("SELECT * FROM `district` where id = ?", [info.answer.general[0].district])
+    let amphur = await query("SELECT * FROM `amphur` where id = ?", [info.answer.general[0].amphur])
+    let province = await query("SELECT * FROM `province` where id = ?", [info.answer.general[0].province])
+    let info_csv = await {
+      fullname: info.fullname,
+      tel: info.answer.general[0].tel,
+      lineID: info.answer.general[0].lineID,
+      address: info.answer.general[0].address,
+      district: (district[0] == undefined) ? "" : district[0]["name_th"],
+      amphur: (amphur[0] == undefined) ? "" : amphur[0]["name_th"],
+      province: (province[0] == undefined) ? "" : province[0]["name_th"],
+      zip_code: info.answer.general[0].zip_code,
+    };
+
+
+
+    data.push(info_csv)
+  }
+
+  const csvWriter = createCsvWriter({
+    path: 'path/to/file.csv',
+    header: [{
+        id: 'fullname',
+        title: 'ชื่อ-นามสกุล'
+      },
+      {
+        id: 'tel',
+        title: 'เบอร์โทรศัพท์'
+      },
+      {
+        id: 'lineID',
+        title: 'Line id'
+      },
+      {
+        id: 'address',
+        title: 'ที่อยู่'
+      },
+      {
+        id: 'district',
+        title: 'ตำบล/แขวง'
+      },
+      {
+        id: 'amphoe',
+        title: 'อำเภอ/เขต'
+      },
+      {
+        id: 'province',
+        title: 'จังหวัด'
+      },
+      {
+        id: 'zip_code',
+        title: 'รหัสไปรษณีย์'
+      },
+    ]
+  });
+  csvWriter.writeRecords(data) // returns a promise
+    .then(() => {
+      console.log('...Done');
+    });
   res.json({
     status: 'success',
-    data: result
+    data: data
   });
 
 })
@@ -58,6 +119,8 @@ app.delete('/user/:id', async (req, res) => {
   });
 
 })
+
+
 
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
