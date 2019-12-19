@@ -21,9 +21,9 @@ var con = mysql.createPool({
 const query = util.promisify(con.query).bind(con);
 
 app.get('/', async (req, res) => {
-  let result = await query("SELECT user_questionnaire_info.*,user.username,user.fullname FROM `user_questionnaire_info` INNER JOIN `user` ON user.id =user_questionnaire_info.user_id  where user_questionnaire_info.status_id = 1");
+  let result = await query("SELECT user.username,user.fullname,user_questionnaire_info.* FROM `user_questionnaire_info` INNER JOIN `user` ON user.id =user_questionnaire_info.user_id  where user_questionnaire_info.status_id = 1");
   result.map(data => {
-    data.answer = "";
+    data.answer = JSON.parse(data.answer);
     return data;
   })
   res.json({
@@ -34,9 +34,9 @@ app.get('/', async (req, res) => {
 })
 
 app.get('/excel', async (req, res) => {
-  let result = await query("SELECT user_questionnaire_info.*,user.username,user.fullname FROM `user_questionnaire_info` INNER JOIN `user` ON user.id =user_questionnaire_info.user_id  where user_questionnaire_info.status_id = 1");
+  let result = await query("SELECT user.username,user.fullname,user_questionnaire_info.* FROM `user_questionnaire_info` INNER JOIN `user` ON user.id =user_questionnaire_info.user_id  where user_questionnaire_info.status_id = 1");
   result.map(data => {
-    data.answer = "";
+    data.answer = JSON.parse(data.answer);
     return data;
   })
   res.json({
